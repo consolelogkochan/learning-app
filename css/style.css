@@ -1,0 +1,1144 @@
+/* =================================================================
+   1. 基本スタイル (Base Styles)
+   - ページ全体の基本的な設定 -
+   ================================================================= */
+body {
+    font-family: sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* ページ全体のコンテナ */
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ヘッダーの基本スタイル */
+header {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* コンテンツ部分の基本スタイル */
+main {
+    margin: 0 auto; 
+    width: 800px; /* ▼ デフォルトの幅をここで指定 */
+}
+
+.auth-container {
+    width: 400px;
+    align-self: center; /* ▼ 親のFlexboxによる引き伸ばしを解除し、中央に配置 */
+    margin-top: 40px;   /* ▼ 上部に程よい余白を追加 */
+    margin-bottom: 40px;/* ▼ 下部に程よい余白を追加 */
+}
+
+/* =================================================================
+   2. レイアウト (Layouts)
+   - 主要なページの骨格となるセクションのスタイル -
+   ================================================================= */
+
+/* ----- メインヘッダー ----- */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+.main-header .header-center {
+    text-align: center;
+    flex-grow: 1;
+}
+.main-header .header-center h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+.main-header .header-center p {
+    margin: 0;
+    color: #555;
+}
+.main-header .header-right {
+    position: relative;
+}
+
+/* ----- 学習サマリー（グラフ） ----- */
+.stats-section {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+.charts-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+.chart-container {
+    width: 50%;
+    height: 400px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+.chart-container h3 {
+    text-align: center;
+    font-size: 1em;
+    font-weight: normal;
+    flex-shrink: 0;
+}
+.chart-canvas-container {
+    position: relative;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+/* ----- ログ一覧 ----- */
+.list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+}
+.list-header h2 {
+    margin: 0;
+}
+.log-count {
+    font-size: 0.9em;
+    color: #555;
+}
+.log-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    margin-bottom: 25px;
+}
+.log-header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 16px;
+}
+.log-body {
+    padding: 0 16px 16px 16px;
+}
+.log-footer {
+    position: relative;
+    background-color: #f8f9fa;
+    padding: 16px;
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 8px 8px;
+}
+
+/* =================================================================
+   3. コンポーネント (Components)
+   - 再利用される、または独立した部品のスタイル -
+   ================================================================= */
+
+/* ----- アバター ----- */
+.profile-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+.profile-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    vertical-align: middle;
+    margin-right: 20px;
+}
+.profile-avatar-comment {
+    width: 30px;
+    height: 30px;
+}
+.profile-avatar-large + h1 {
+    display: inline-block;
+    vertical-align: middle;
+}
+.main-header .profile-avatar {
+    width: 50px;
+    height: 50px;
+}
+.main-header .profile-avatar-placeholder {
+    font-size: 50px;
+    color: #ccc;
+    display: block;
+}
+
+/* ----- メニュー（3点ボタンとドロップダウン） ----- */
+.main-header .profile-menu-container {
+    position: relative;
+}
+.main-header .profile-menu-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: block;
+    height: 50px; 
+}
+.main-header .profile-menu {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    width: 180px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 20;
+}
+.main-header .profile-menu.active {
+    display: block;
+}
+.main-header .profile-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+}
+.main-header .profile-menu .menu-item:hover {
+    background-color: #f4f4f4;
+}
+.log-menu-container {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+}
+.comment-menu-container {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    z-index: 5;
+}
+.menu-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 10px;
+    line-height: 1;
+}
+.log-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 10;
+    width: 100px;
+}
+.log-menu.active {
+    display: block;
+}
+.log-menu form {
+    margin: 0;
+}
+.log-menu .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    font-family: inherit;
+    text-align: left;
+    text-decoration: none;
+    color: #333;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin: 0;
+}
+.log-menu .menu-item:hover {
+    background-color: #f4f4f4;
+}
+.log-menu .menu-item.delete {
+    color: #dc3545;
+}
+
+/* ----- フォーム関連 ----- */
+.form-group {
+    margin-bottom: 10px;
+}
+.learning-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    gap: 10px;
+    position: relative;
+    padding-right: 70px; /* 削除ボタンのスペースを確保 */
+}
+.category-management form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.category-management input[text] {
+    flex-grow: 1;
+    padding: 8px;
+    box-sizing: border-box;
+}
+.comment-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
+}
+.comment-form button {
+    display: block;
+    margin-left: auto;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid #007bff;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+/* ----- ログ一覧フィルターのスタイル ----- */
+.filter-controls {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.filter-form {
+    display: flex;
+    flex-wrap: wrap; /* スマホ表示で折り返す */
+    gap: 15px; /* 各要素間の隙間 */
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    font-size: 0.9em;
+    flex-shrink: 0; /* ラベルが縮まないようにする */
+}
+
+.filter-group input[type="search"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.filter-actions .btn-clear {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 1em;
+    margin-left: 10px;
+}
+
+.filter-actions .btn-clear:hover {
+    text-decoration: underline;
+    color: #007bff;
+}
+
+/* ----- カスタムプルダウンのスタイル ----- */
+.custom-select-wrapper {
+    position: relative; /* 選択肢リストの配置の基準点 */
+}
+/* 1. ダッシュボードのフィルター内で使われる場合 */
+.filter-controls .custom-select-wrapper {
+    min-width: 150px; /* 最小幅を200pxに設定 */
+}
+/* 2. 投稿・編集フォームの学習項目行で使われる場合 */
+.learning-item .custom-select-wrapper {
+    width: 30%;
+}
+.custom-select-trigger {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+.custom-select-trigger .fa-chevron-down {
+    transition: transform 0.2s ease;
+}
+.custom-select-wrapper.open .custom-select-trigger .fa-chevron-down {
+    transform: rotate(180deg);
+}
+.custom-options {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 100;
+}
+.custom-select-wrapper.open .custom-options {
+    display: block;
+}
+.custom-option {
+    padding: 10px;
+    cursor: pointer;
+}
+.custom-option:hover {
+    background-color: #f4f4f4;
+}
+.custom-option.selected {
+    background-color: #007bff;
+    color: white;
+}
+/* ----- 学習項目 削除ボタンのスタイル ----- */
+.duration-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1; /* 残りのスペースを埋める */
+}
+
+.remove-item-btn {
+    position: absolute; /* ▼ 絶対位置で配置 */
+    top: 50%; /* ▼ 親要素の縦中央に配置 */
+    right: 35%; /* ▼ 親要素の右端に配置 */
+    transform: translateY(-50%); /* ▼ 縦位置の微調整 */
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    margin-left: 0; 
+}
+.remove-item-btn:hover {
+    background-color: #c82333;
+}
+
+/* ----- コメント ----- */
+.author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.author-info strong {
+    display: block;
+}
+.author-info small {
+    color: #6c757d;
+}
+.comment-list-wrapper {
+    margin-bottom: 16px;
+}
+.comment {
+    font-size: 0.9em;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+.comment:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.comment-meta {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.comment-author-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.comment-timestamp {
+    color: #888;
+}
+.toggle-comments-btn {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 5px 0;
+    margin-bottom: 10px;
+    display: block;
+}
+.toggle-comments-btn:hover {
+    text-decoration: underline;
+}
+
+/* ----- カテゴリタグ ----- */
+.log-category-tag {
+    background-color: #e7f5ff;
+    color: #1971c2;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+.log-summary {
+    margin-bottom: 16px;
+    font-size: 0.9em;
+    color: #495057;
+}
+.log-summary-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.log-summary-item i {
+    color: #868e96;
+}
+.log-content {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 12px;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+/* ----- ページネーション ----- */
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+.pagination ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+}
+.pagination li {
+    margin: 0 5px;
+}
+.pagination li a,
+.pagination li span {
+    display: block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #333;
+}
+.pagination li a:hover {
+    background-color: #f4f4f4;
+}
+.pagination li.active span {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+    cursor: default;
+}
+
+/* ----- フローティングボタン ----- */
+.btn-add-log-floating {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    text-decoration: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: transform 0.2s ease-in-out;
+    transform: translateZ(0);
+}
+.btn-add-log-floating:hover {
+    transform: scale(1.1);
+}
+
+/* =================================================================
+   4. Pages (ページ固有のスタイル)
+   - 特定のページのみに適用されるスタイル -
+   ================================================================= */
+
+/* ----- 投稿・編集フォームページ ----- */
+.form-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 16px 0;
+    margin-bottom: 30px;
+}
+.form-header .header-content {
+    width: 800px;
+    margin: 0 auto;
+    position: relative;
+    text-align: center;
+}
+.form-header a {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-decoration: none;
+    color: #495057;
+}
+.form-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.form-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.form-card hr {
+    border: none;
+    border-top: 1px solid #e9ecef;
+    margin: 20px 0;
+}
+.form-card h2 {
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+.form-card label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+/* フォーム入力欄のスタイルを上書き */
+.log-form input,
+.log-form textarea,
+.category-management input {
+    font-size: 1rem;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.log-form .learning-item input[type="number"] {
+    width: 40%;
+}
+.log-form textarea[name="content"] {
+    width: 100%;
+    min-height: 120px; /* テキストエリアの最小の高さを設定 */
+    height: auto;
+}
+
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end; /* 右寄せ */
+    gap: 10px;
+    margin-top: 30px;
+}
+
+/* 共通ボタンスタイル */
+.btn {
+    display: inline-flex;     /* ▼ displayプロパティを変更 */
+    justify-content: center; /* ▼ 水平方向の中央揃え */
+    align-items: center;     /* ▼ 垂直方向の中央揃え */
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out; /* アニメーション効果を追加 */
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* プライマリボタン (投稿する) */
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+/* セカンダリボタン (キャンセル, 追加) */
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* テキストボタン (内容を追加する) */
+.btn-add-item {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    padding: 5px 0;
+    margin: 5px 0 15px 0;
+    font-weight: bold;
+    display: inline-block;
+    transition: color 0.2s;
+}
+.btn-add-item:hover {
+    color: #0056b3;
+}
+
+/* ----- プロフィールページ ----- */
+.profile-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.profile-header-main {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar-large-placeholder {
+    font-size: 100px;
+    color: #ccc;
+    display: block;
+}
+
+.profile-name h2 {
+    margin: 0 0 5px 0;
+    font-size: 1.8rem;
+}
+
+.account-id {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.profile-actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.profile-body {
+    padding: 24px;
+}
+
+.profile-item {
+    margin-bottom: 20px;
+}
+
+.profile-item:last-child {
+    margin-bottom: 0;
+}
+
+.profile-item label {
+    display: block;
+    font-weight: bold;
+    font-size: 1em;
+    color: #007bff;
+    margin-bottom: 8px;
+}
+
+.profile-item p {
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ----- プロフィール編集ページ ----- */
+
+.profile-card .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 24px;
+    border-top: 1px solid #e9ecef;
+    background-color: #f8f9fa;
+    border-radius: 0 0 8px 8px;
+}
+
+.form-row {
+    display: flex;
+    padding: 24px;
+    border-bottom: 1px solid #e9ecef;
+}
+.form-row:last-child {
+    border-bottom: none;
+}
+.form-row > label {
+    flex-basis: 200px; /* 左側のラベルの幅を固定 */
+    flex-shrink: 0;
+    font-weight: bold;
+    padding-top: 8px; /* 入力欄と高さを合わせる */
+}
+.form-row .profile-image-edit label {
+    text-align: center; /* 画像アップロードのラベルをセンタリング */
+    flex-basis: auto; /* ラベルの幅を固定しない */
+}
+.form-row .input-area {
+    flex-grow: 1; /* 右側が残りの幅をすべて使う */
+}
+.form-row input[type="text"],
+.form-row textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.profile-image-edit {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+/* デフォルトのファイル選択ボタンを隠す */
+.profile-image-edit input[type="file"] {
+    display: none;
+}
+/* labelをボタンのように見せる */
+.profile-image-edit .btn {
+    cursor: pointer;
+}
+
+/* =================================================================
+   5. Pages (ページ固有のスタイル)
+   - ログイン、新規登録など -
+   ================================================================= */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.auth-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 30px 40px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.auth-card h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.auth-navigation {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 12px 12px 40px; /* アイコンのスペースを確保 */
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.auth-card .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+}
+
+.form-links {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+
+.success-message {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* 画面に表示しないが、アクセシビリティのために残すラベル */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.auth-card form label {
+    display: block;
+    font-weight: bold;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+.auth-card .auth-navigation {
+    text-align: left;
+}
+.auth-card form .required {
+    color: #dc3545;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+.auth-card form .form-text {
+    display: block;
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+.auth-card .form-group input[type="text"],
+.auth-card .form-group input[type="email"],
+.auth-card .form-group input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+.show-password {
+    display: flex;
+    align-items: center;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
+.show-password label {
+    font-weight: normal;
+    font-size: 0.9em;
+    margin-left: 5px;
+    margin-bottom: 0;
+}
+
+/* ----- 成功メッセージ用のスタイル ----- */
+.success-icon {
+    font-size: 50px;
+    color: #28a745; /* 緑色 */
+    margin-bottom: 20px;
+}
+.success-text {
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+.error-icon {
+    font-size: 50px;
+    color: #dc3545; /* 赤色 */
+    margin-bottom: 20px;
+}
+
+/* =================================================================
+   6. レスポンシブ対応 (メディアクエリ)
+   - 画面幅が768px以下の場合に適用 -
+   ================================================================= */
+   @media (max-width: 768px) {
+
+    /* ----- 1. 全体レイアウトの調整 ----- */
+    header, main {
+        width: 100%; /* 固定幅をやめて画面幅いっぱいに */
+        padding: 0 16px; /* 左右に余白を追加 */
+        box-sizing: border-box;
+    }
+    
+    .main-header .header-right {
+        right: 16px; /* 右端の余白を調整 */
+    }
+    .main-header .header-center {
+        text-align: left;
+        padding-left: 15px; /* 左スペースを調整 */
+    }
+
+    /* ----- 2. 学習サマリー（グラフ）の調整 ----- */
+    .charts-wrapper {
+        flex-direction: column; /* 横並びから縦積みに変更 */
+    }
+    .chart-container {
+        width: 100%; /* 幅を100%に */
+        height: 300px; /* 高さを少し小さく */
+    }
+
+    /* ----- 3. ログ一覧ヘッダーとフィルターの調整 ----- */
+    .list-header {
+        flex-direction: column; /* 縦積みに変更 */
+        align-items: flex-start; /* 左揃えに */
+        gap: 10px;
+    }
+    .filter-controls {
+        width: auto;
+    }
+    /* フィルターのラベル幅を統一して、入力欄の開始位置を揃える */
+    .filter-group label {
+        width: 100px; /* ラベルの幅を固定 */
+    }
+
+
+    /* ----- 4. ログカードの調整 ----- */
+    .log-header,
+    .comment-meta {
+        /* ニックネームが長い場合に改行されるように調整 */
+        flex-wrap: wrap; 
+    }
+
+    
+
+    /* ----- ▼▼▼ ここから投稿・編集フォームページのスタイルを追加 ▼▼▼ ----- */
+    
+    /* フォームページのヘッダー調整 */
+    .form-header .header-content {
+        text-align: left; /* ▼テキストを左揃えに */
+        padding: 0 16px; /* ▼左右に余白を追加 */
+    }
+    .form-header h1 {
+        margin-bottom: 5px; /* タイトルの下に少し余白を追加 */
+    }
+    
+    .form-header a {
+        position: static; /* PC用のposition: absoluteを解除 */
+        transform: none;  /* PC用のtransformを解除 */
+        font-size: 0.9em; /* 少し文字を小さくしてバランスをとる */
+    }
+    
+    /* フォームカードの余白を調整 */
+    .form-card {
+        padding: 20px;
+    }
+
+    /* 学習項目の入力欄を縦積みに */
+    .learning-item {
+        flex-direction: column;
+        align-items: stretch; /* 幅を親要素に合わせる */
+    }
+    .learning-item .custom-select-wrapper {
+        width: 80%;
+    }
+    .duration-group {
+        width: 100%;
+    }
+    .log-form .learning-item input[type="number"] {
+        width: 80%; 
+    }
+    .remove-item-btn {
+        position: absolute;
+        top: 80%;
+        right: 15%;
+    }
+
+
+
+    /* 投稿・更新ボタンエリアを調整 */
+    .form-actions {
+        flex-direction: column-reverse; /* ボタンを縦積みにし、「投稿」が上に来るように */
+        gap: 15px;
+    }
+    .form-actions .btn {
+        width: 100%; /* ボタンの幅を100%に */
+        text-align: center;
+        padding: 10px 0;
+    }
+    
+    /* ----- ▲▲▲ ここまで追加 ▲▲▲ ----- */
+
+    /* ----- プロフィールページ ----- */
+    .profile-header {
+        flex-direction: column; /* 縦積みに変更 */
+        gap: 20px;
+    }
+
+    .profile-header-main {
+        flex-direction: column; /* アイコンと名前も縦積みに */
+        align-items: flex-start; /* 左揃えに */
+    }
+
+    .profile-actions {
+        width: 100%; /* 「編集」ボタンの幅を100%に */
+    }
+
+    .profile-actions .btn {
+        width: 100%;
+        justify-content: center; /* ボタン内のテキストとアイコンを中央揃えに */
+    }
+
+    /* ----- プロフィール編集ページ ----- */
+    .form-row {
+        flex-direction: column; /* 2カラムを縦積みに変更 */
+        gap: 10px;
+        padding: 20px 16px;
+    }
+    .form-row > label {
+        flex-basis: auto; /* ラベルの幅固定を解除 */
+        padding-top: 0;
+    }
+    .profile-image-edit {
+        flex-direction: column; /* 画像と変更ボタンを縦積みに */
+        align-items: flex-start;
+    }
+    
+    /* ----- 5. 認証ページの調整 ----- */
+    /* 認証ページのカード幅を調整 */
+    .auth-container {
+        width: 100%;
+        padding: 0 20px;
+        box-sizing: border-box;
+    }
+}

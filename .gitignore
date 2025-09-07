@@ -1,0 +1,8 @@
+# .envファイル（環境変数と機密情報）
+.env
+
+# Composerでインストールしたライブラリ
+/vendor/
+
+# Macのシステムファイル
+.DS_Store
