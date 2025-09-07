@@ -6,3 +6,6 @@
 
 # Macのシステムファイル
 .DS_Store
+
+# 環境依存の設定ファイル
+.htaccess
