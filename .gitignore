@@ -6,3 +6,8 @@
 
 # Macのシステムファイル
 .DS_Store
+
+# 開発・テスト関連のファイル/フォルダ
+/src/
+/tests/
+.phpunit.result.cache
