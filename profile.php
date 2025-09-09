@@ -1,9 +1,11 @@
 <?php
 session_start();
 require_once 'db_connect.php';
-require_once 'utils.php'; // ★エラー処理関数を読み込む
+require_once 'utils.php';
 
-// ▼▼▼ ログインチェックを追加 ▼▼▼
+// ▼▼▼▼▼ このPHPブロックを全面的に修正 ▼▼▼▼▼
+
+// ログインチェック
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit();
@@ -12,7 +14,9 @@ if (!isset($_SESSION['user_id'])) {
 // URLから表示するユーザーのIDを取得
 $profile_user_id = $_GET['id'] ?? 0;
 if (empty($profile_user_id)) {
-    show_error_and_exit('表示するユーザーが指定されていません。');
+    $_SESSION['flash_message'] = ['type' => 'error', 'message' => '表示するユーザーが指定されていません。'];
+    header('Location: dashboard.php');
+    exit();
 }
 
 // ログインしているユーザー自身のID
@@ -26,14 +30,20 @@ try {
     $stmt->execute();
     $user = $stmt->fetch();
 
-    // ユーザーが存在しない場合はエラー表示
+    // ユーザーが存在しない場合はエラー
     if (!$user) {
-        show_error_and_exit('指定されたユーザーは見つかりません。');
+        $_SESSION['flash_message'] = ['type' => 'error', 'message' => '指定されたユーザーは見つかりません。'];
+        header('Location: dashboard.php');
+        exit();
     }
 
 } catch (PDOException $e) {
-    show_error_and_exit('ユーザー情報の取得に失敗しました。', $e->getMessage());
+    error_log('User profile fetch failed: ' . $e->getMessage());
+    $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'ユーザー情報の取得に失敗しました。'];
+    header('Location: dashboard.php');
+    exit();
 }
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 ?>
 <!DOCTYPE html>
 <html lang="ja">

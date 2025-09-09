@@ -1,37 +1,52 @@
 <?php
 session_start();
 require_once 'db_connect.php';
-require_once 'utils.php'; // ★エラー処理関数を読み込む
+require_once 'utils.php';
 
-// 権限チェックとリクエストメソッドの検証
+// ▼▼▼▼▼ エラー処理を全面的に修正 ▼▼▼▼▼
+
+// --- 事前チェック ---
 if (!isset($_SESSION['user_id'])) {
-    show_error_and_exit('この操作を行うにはログインが必要です。');
+    // ログインしていない場合は、flashメッセージは不要でログインページへ
+    header('Location: login.php');
+    exit();
 }
-// POSTリクエストかチェック
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    show_error_and_exit('不正なリクエストです。');
+    $_SESSION['flash_message'] = [
+        'type' => 'error',
+        'message' => '不正なリクエストです。'
+    ];
+    header('Location: dashboard.php');
+    exit();
 }
 
-// 入力値の検証
 $user_id = $_SESSION['user_id'];
 $log_id = $_POST['log_id'] ?? 0;
 
 if (empty($log_id)) {
-    show_error_and_exit('削除するログが指定されていません。');
+    $_SESSION['flash_message'] = [
+        'type' => 'error',
+        'message' => '削除するログが指定されていません。'
+    ];
+    header('Location: dashboard.php');
+    exit();
 }
 
-// データベース処理
 try {
     // --- 権限チェック ---
     $sql_check = "SELECT user_id FROM learning_logs WHERE id = :id";
     $stmt_check = $pdo->prepare($sql_check);
-    // ▼▼▼ この行を修正しました ▼▼▼
     $stmt_check->bindValue(':id', $log_id, PDO::PARAM_INT);
     $stmt_check->execute();
     $log_owner = $stmt_check->fetch();
 
     if (!$log_owner || $log_owner['user_id'] !== $user_id) {
-        show_error_and_exit('このログを削除する権限がありません。');
+        $_SESSION['flash_message'] = [
+            'type' => 'error',
+            'message' => 'このログを削除する権限がありません。'
+        ];
+        header('Location: dashboard.php');
+        exit();
     }
 
     // --- 削除処理 ---
@@ -40,10 +55,21 @@ try {
     $stmt_delete->bindValue(':id', $log_id, PDO::PARAM_INT);
     $stmt_delete->execute();
 
-    // ダッシュボードにリダイレクト
+    // --- 成功メッセージをセットしてリダイレクト ---
+    $_SESSION['flash_message'] = [
+        'type' => 'success',
+        'message' => '学習ログを削除しました。'
+    ];
     header('Location: dashboard.php');
     exit();
 
 } catch (PDOException $e) {
-    show_error_and_exit('ログの削除に失敗しました。時間をおいて再度お試しください。', $e->getMessage());
+    error_log('Log deletion failed: ' . $e->getMessage()); // 開発者向けログ
+    $_SESSION['flash_message'] = [
+        'type' => 'error',
+        'message' => 'エラーが発生し、ログを削除できませんでした。'
+    ];
+    header('Location: dashboard.php');
+    exit();
 }
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲

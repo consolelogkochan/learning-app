@@ -1,3 +1,13 @@
+<?php
+// ▼▼▼▼▼ このPHPブロックを追加 ▼▼▼▼▼
+session_start();
+// セッションからシステムエラーのメッセージを取得する
+$error_message = $_SESSION['system_error'] ?? '不明なエラーが発生しました。時間をおいて再度お試しください。';
+// 一度表示したら不要なので、セッションから削除する
+unset($_SESSION['system_error']);
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
+?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -16,10 +26,10 @@
             </div>
             <h1>エラーが発生しました</h1>
             <p class="success-text">
-                <?php echo htmlspecialchars($error_message ?? '不明なエラーが発生しました。時間をおいて再度お試しください。'); ?>
+                <?php echo htmlspecialchars($error_message, ENT_QUOTES); ?>
             </p>
             <div class="form-links">
-                <a href="dashboard.php" class="btn btn-secondary">戻る</a>
+                <a href="javascript:history.back()" class="btn btn-secondary">戻る</a>
             </div>
         </div>
     </main>

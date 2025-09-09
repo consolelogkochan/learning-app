@@ -1,14 +1,31 @@
 <?php
+session_start();
+
 require_once 'db_connect.php';
 require_once 'utils.php'; // ★エラー処理関数を読み込む
 require_once 'send_mail.php';
 date_default_timezone_set('Asia/Tokyo');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    show_error_and_exit('不正なリクエストです。');
+// ▼▼▼▼▼ バリデーション処理を追加 ▼▼▼▼▼
+$email = $_POST['email'] ?? '';
+$errors = [];
+
+// メールアドレスのバリデーション
+if (empty($email)) {
+    $errors['email'] = 'メールアドレスを入力してください。';
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors['email'] = 'メールアドレスの形式が正しくありません。';
 }
 
-$email = $_POST['email'] ?? '';
+// バリデーションエラーがあった場合
+if (!empty($errors)) {
+    // エラーと入力値をセッションに保存して、フォームに戻す
+    $_SESSION['errors'] = $errors;
+    $_SESSION['old_input'] = $_POST;
+    header('Location: password_request.php');
+    exit;
+}
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 try {
     // 入力されたメールアドレスを持つユーザーを検索
@@ -41,6 +58,7 @@ try {
     exit();
 
 } catch (PDOException $e) {
-    // DBエラーが発生した場合は、統一エラーページを表示
-    show_error_and_exit('処理中にエラーが発生しました。時間をおいて再度お試しください。', $e->getMessage());
+    // ▼▼▼▼▼ DBエラーの処理を新しい関数に変更 ▼▼▼▼▼
+    handle_system_error('処理中にエラーが発生しました。時間をおいて再度お試しください。', $_POST, $e->getMessage());
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 }

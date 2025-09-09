@@ -1,36 +1,47 @@
 <?php
 session_start();
 require_once 'db_connect.php';
-require_once 'utils.php'; // ★エラー処理関数を読み込む
+require_once 'utils.php';
 
-// 権限チェックとリクエストメソッドの検証
+// ▼▼▼▼▼ エラー処理を全面的に修正 ▼▼▼▼▼
+
+// --- 事前チェック ---
 if (!isset($_SESSION['user_id'])) {
-    show_error_and_exit('この操作を行うにはログインが必要です。');
+    header('Location: login.php');
+    exit();
 }
-// POSTリクエストかチェック
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    show_error_and_exit('不正なリクエストです。');
+    $_SESSION['flash_message'] = ['type' => 'error', 'message' => '不正なリクエストです。'];
+    header('Location: dashboard.php');
+    exit();
 }
 
-// 入力値の検証
 $user_id = $_SESSION['user_id'];
 $comment_id = $_POST['comment_id'] ?? 0;
 
 if (empty($comment_id)) {
-    show_error_and_exit('削除するコメントが指定されていません。');
+    $_SESSION['flash_message'] = ['type' => 'error', 'message' => '削除するコメントが指定されていません。'];
+    header('Location: dashboard.php');
+    exit();
 }
 
-// データベース処理
+// --- データベース処理 ---
 try {
-    // --- 権限チェック ---
-    $sql_check = "SELECT user_id FROM comments WHERE id = :id";
+    // --- 権限チェック と log_id取得 ---
+    $sql_check = "SELECT user_id, log_id FROM comments WHERE id = :id";
     $stmt_check = $pdo->prepare($sql_check);
     $stmt_check->bindValue(':id', $comment_id, PDO::PARAM_INT);
     $stmt_check->execute();
-    $comment_owner = $stmt_check->fetch();
+    $comment = $stmt_check->fetch();
+    
+    // アンカー付きリダイレクト先のURLを準備
+    $log_id = $comment['log_id'] ?? null;
+    $redirect_url = $log_id ? "dashboard.php#log-{$log_id}" : "dashboard.php";
 
-    if (!$comment_owner || $comment_owner['user_id'] !== $user_id) {
-        show_error_and_exit('このコメントを削除する権限がありません。');
+    if (!$comment || $comment['user_id'] !== $user_id) {
+        $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'このコメントを削除する権限がありません。'];
+        header("Location: {$redirect_url}");
+        exit();
     }
 
     // --- 削除処理 ---
@@ -39,10 +50,16 @@ try {
     $stmt_delete->bindValue(':id', $comment_id, PDO::PARAM_INT);
     $stmt_delete->execute();
 
-    // 元のページに戻る (リファラーを使用)
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
+    // --- 成功メッセージをセットしてリダイレクト ---
+    $_SESSION['flash_message'] = ['type' => 'success', 'message' => 'コメントを削除しました。'];
+    header("Location: {$redirect_url}");
     exit();
 
 } catch (PDOException $e) {
-    show_error_and_exit('コメントの削除に失敗しました。時間をおいて再度お試しください。', $e->getMessage());
+    error_log('Comment deletion failed: ' . $e->getMessage());
+    $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'コメントの削除に失敗しました。'];
+    // catchブロックでは$log_idが取得できない可能性があるので、アンカーなしでリダイレクト
+    header('Location: dashboard.php');
+    exit();
 }
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
