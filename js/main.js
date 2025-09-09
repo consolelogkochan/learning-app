@@ -273,3 +273,60 @@ if (imageInput && imagePreview) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    // save-stateクラスを持つ全ての要素を取得
+    const saveStateTriggers = document.querySelectorAll('.save-state');
+    
+    saveStateTriggers.forEach(trigger => {
+        trigger.addEventListener('click', function(event) {
+            // 本来の動作（ページ遷移やフォーム送信）を一旦停止
+            event.preventDefault();
+
+            // 保存したいフォームを特定
+            // 今回は学習ログフォームのデータを保存する
+            const formToSave = document.getElementById('log-form');
+            if (!formToSave) return;
+
+            // FormDataオブジェクトを使ってフォームの全データを取得
+            const formData = new FormData(formToSave);
+
+            // fetch APIを使って、裏側でsave_form_state.phpにデータを送信
+            fetch('save_form_state.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // セッションへの保存が成功したら、本来の動作を実行
+                    
+                    // クリックされたのがsubmitボタンか？
+                    if (trigger.type === 'submit') {
+                        // 対応するフォームを送信
+                        trigger.closest('form').submit();
+                    } else if (trigger.tagName === 'A') {
+                        // aタグの場合は、そのリンク先に遷移
+                        window.location.href = trigger.href;
+                    }
+                } else {
+                    // エラーの場合は、とりあえず本来の動作をそのまま実行
+                    console.error('Failed to save form state:', data.message);
+                    if (trigger.type === 'submit') {
+                        trigger.closest('form').submit();
+                    } else if (trigger.tagName === 'A') {
+                        window.location.href = trigger.href;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch:', error);
+                // 通信失敗時も、本来の動作を実行
+                if (trigger.type === 'submit') {
+                    trigger.closest('form').submit();
+                } else if (trigger.tagName === 'A') {
+                    window.location.href = trigger.href;
+                }
+            });
+        });
+    });
+});

@@ -1,56 +1,55 @@
 <?php
+session_start();
+
 // 必要なファイルを読み込む
-require_once 'db_connect.php'; // データベース接続
+require_once 'db_connect.php'; // データベース接続、.envを読み込む処理もここに含まれる
 require_once 'utils.php'; // ★エラー処理関数を読み込む
 require_once 'send_mail.php';  // メール送信関数
 date_default_timezone_set('Asia/Tokyo');
 
-// ▼▼▼ この行を追加 ▼▼▼
-// -----------------------------------------------------
-// ★★★ ここに、手順1で決めた招待コードを入力 ★★★
-// -----------------------------------------------------
-define('INVITATION_CODE', 'SagaFriends-ItStudy-Summit2025'); 
-// ▲▲▲ ここまで追加 ▲▲▲
-
+// ▼▼▼▼▼ バリデーション処理を全面的に修正 ▼▼▼▼▼
 // エラーメッセージを格納する配列
 $errors = [];
 
-// --- バリデーション ---
+// POSTデータを取得
 $nickname = trim($_POST['nickname'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 $invite_code = trim($_POST['invite_code'] ?? '');
 
-// (前回作成したバリデーションコードをここに記述)
-if (empty($_POST['nickname'])) {
-    $errors[] = 'ニックネームは必須項目です。';
+// ニックネームのバリデーション
+if (empty($nickname)) {
+    $errors['nickname'] = 'ニックネームは必須項目です。';
 }
-if (empty($_POST['email'])) {
-    $errors[] = 'メールアドレスは必須項目です。';
-} elseif (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-    $errors[] = 'メールアドレスの形式が正しくありません。';
+
+// メールアドレスのバリデーション
+if (empty($email)) {
+    $errors['email'] = 'メールアドレスは必須項目です。';
+} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $errors['email'] = 'メールアドレスの形式が正しくありません。';
 }
-if (empty($_POST['password'])) {
-    $errors[] = 'パスワードは必須項目です。';
-} elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $_POST['password'])) {
-    $errors[] = 'パスワードは8文字以上で、大文字、小文字、数字をそれぞれ1文字以上含める必要があります。';
+
+// パスワードのバリデーション
+if (empty($password)) {
+    $errors['password'] = 'パスワードは必須項目です。';
+} elseif (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $password)) {
+    $errors['password'] = 'パスワードは8文字以上で、大文字、小文字、数字をそれぞれ1文字以上含める必要があります。';
 }
-// ▼▼▼ このif文を追加 ▼▼▼
+
+// 招待コードのバリデーション
 if (empty($invite_code)) {
-    $errors[] = '招待コードは必須項目です。';
-} elseif ($invite_code !== INVITATION_CODE) {
-    $errors[] = '招待コードが正しくありません。';
+    $errors['invite_code'] = '招待コードは必須項目です。';
+} elseif ($invite_code !== $_ENV['INVITATION_CODE']) { // .envから読み込む
+    $errors['invite_code'] = '招待コードが正しくありません。';
 }
-// ▲▲▲ ここまで追加 ▲▲▲
-// バリデーションエラーがあった場合、エラーメッセージをまとめて表示
+
+// バリデーションエラーがあった場合
 if (!empty($errors)) {
-    // エラーメッセージをHTMLのリスト形式に変換
-    $error_html = '<ul>';
-    foreach ($errors as $error) {
-        $error_html .= '<li>' . htmlspecialchars($error) . '</li>';
-    }
-    $error_html .= '</ul>';
-    show_error_and_exit($error_html);
+    // エラーと入力値をセッションに保存して、フォームに戻す
+    $_SESSION['errors'] = $errors;
+    $_SESSION['old_input'] = $_POST;
+    header('Location: signup.php');
+    exit;
 }
 
 
@@ -82,9 +81,14 @@ try {
     exit();
 
 } catch (PDOException $e) {
-    if ($e->getCode() == 23000) { // 一意制約違反
-        show_error_and_exit('このメールアドレスは既に使用されています。');
+    // ▼▼▼▼▼ DBエラーの処理を修正 ▼▼▼▼▼
+    if ($e->getCode() == 23000) { // 一意制約違反（メールアドレス重複）
+        $_SESSION['errors']['email'] = 'このメールアドレスは既に使用されています。';
+        $_SESSION['old_input'] = $_POST;
+        header('Location: signup.php');
+        exit;
     }
-    // その他のDBエラー
-    show_error_and_exit('ユーザー登録中にエラーが発生しました。', $e->getMessage());
+    // その他のDBエラーはシステムエラーとして処理
+    handle_system_error('ユーザー登録中にエラーが発生しました。', $_POST, $e->getMessage());
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 }

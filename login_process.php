@@ -5,13 +5,27 @@ session_start();
 require_once 'db_connect.php';
 require_once 'utils.php'; // ★エラー処理関数を読み込む
 
-// バリデーション
-if (empty($_POST['email']) || empty($_POST['password'])) {
-    show_error_and_exit('メールアドレスとパスワードを入力してください。');
-}
-
+// ▼▼▼▼▼ バリデーション処理を修正 ▼▼▼▼▼
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
+
+$errors = [];
+if (empty($email)) {
+    $errors['email'] = 'メールアドレスを入力してください。';
+}
+if (empty($password)) {
+    $errors['password'] = 'パスワードを入力してください。';
+}
+
+// バリデーションエラーがあった場合
+if (!empty($errors)) {
+    // エラーと入力値をセッションに保存して、フォームに戻す
+    $_SESSION['errors'] = $errors;
+    $_SESSION['old_input'] = $_POST;
+    header('Location: login.php');
+    exit;
+}
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 
 try {
     // ユーザーをメールアドレスで検索
@@ -37,37 +51,20 @@ try {
         exit();
 
     } else {
-        // 認証失敗
-        show_error_and_exit('メールアドレスまたはパスワードが間違っています。');
+        // ▼▼▼▼▼ 認証失敗の処理を修正 ▼▼▼▼▼
+        // エラーとメールアドレスをセッションに保存して、フォームに戻す
+        $_SESSION['error_message'] = 'メールアドレスまたはパスワードが間違っています。';
+        $_SESSION['old_input']['email'] = $email;
+        header('Location: login.php');
+        exit;
+        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
     }
 
 } catch (PDOException $e) {
-    show_error_and_exit('認証処理中にエラーが発生しました。', $e->getMessage());
+    // ▼▼▼▼▼ DBエラーの処理を修正 ▼▼▼▼▼
+    // 新しいシステムエラー処理関数を呼び出す
+    handle_system_error('認証処理中にエラーが発生しました。', $_POST, $e->getMessage());
+    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 }
 ?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログインエラー</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-</head>
-<body class="auth-page">
-<div class="page-container">
-    <main class="auth-container">
-        <div class="auth-card" style="text-align: center;">
-            <div class="error-icon">
-                <i class="fa-solid fa-circle-xmark"></i>
-            </div>
-            <h1>ログインエラー</h1>
-            <p class="success-text"><?php echo htmlspecialchars($error_message); ?></p>
-            <div class="form-links">
-                <a href="login.php" class="btn btn-secondary">ログインページに戻る</a>
-            </div>
-        </div>
-    </main>
-</div>
-</body>
-</html>
+

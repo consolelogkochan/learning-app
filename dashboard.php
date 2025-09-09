@@ -3,6 +3,13 @@
 session_start();
 require_once 'db_connect.php';
 
+// セッションからフラッシュメッセージを取得
+$flash_message = $_SESSION['flash_message'] ?? null;
+// 一度表示したら不要なので、セッションから削除する
+if ($flash_message) {
+    unset($_SESSION['flash_message']);
+}
+
 // ログインしているかチェック
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
@@ -157,7 +164,7 @@ try {
 
 } catch (PDOException $e) {
     require_once 'utils.php';
-    show_error_and_exit('データの取得中にエラーが発生しました。時間をおいて再度お試しください。', $e->getMessage());
+    handle_system_error('データの取得中にエラーが発生しました。時間をおいて再度お試しください。', [], $e->getMessage());
 }
 // --- ここまで追加 ---
 
@@ -170,6 +177,7 @@ try {
     <title>ダッシュボード</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
 <div class="page-container">
@@ -305,7 +313,7 @@ try {
                 <p>まだ学習ログがありません。</p>
             <?php else: ?>
                 <?php foreach ($logs as $log): ?>
-                    <div class="log-card">
+                    <div class="log-card" id="log-<?php echo $log['id']; ?>">
                         <div class="log-header">
                             <div class="author-info">
                                 <a href="profile.php?id=<?php echo $log['user_id']; ?>">
@@ -509,5 +517,23 @@ try {
     
     <script src="js/main.js"></script>
     
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <?php if ($flash_message): ?>
+    <script>
+        // メッセージタイプに応じて背景色を決定
+        const messageType = "<?php echo htmlspecialchars($flash_message['type'], ENT_QUOTES); ?>";
+        const backgroundColor = messageType === 'success' ? '#28a745' : '#dc3545'; // 成功なら緑、エラーなら赤
+
+        Toastify({
+            text: "<?php echo htmlspecialchars($flash_message['message'], ENT_QUOTES); ?>",
+            duration: 5000, // 5秒間表示 
+            gravity: "top",
+            position: "center",
+            backgroundColor: backgroundColor,
+            stopOnFocus: true
+        }).showToast();
+    </script>
+    <?php endif; ?>
+
 </body>
 </html>
