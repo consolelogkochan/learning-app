@@ -1,6 +1,8 @@
 <?php
 // ▼▼▼▼▼ このPHPブロックを追加 ▼▼▼▼▼
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 // セッションからシステムエラーのメッセージを取得する
 $error_message = $_SESSION['system_error'] ?? '不明なエラーが発生しました。時間をおいて再度お試しください。';
 // 一度表示したら不要なので、セッションから削除する

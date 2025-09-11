@@ -131,37 +131,65 @@ if (chartCanvas) {
     });
 }
 
-// ----- 円グラフ描画処理 -----
+// ----- 円グラフ描画処理を、横棒グラフに変更 -----
 
-// 円グラフを描画するcanvas要素を取得
-const pieChartCanvas = document.getElementById('categoryPieChart');
+// 横棒グラフを描画するcanvas要素を取得
+const barChartCanvas = document.getElementById('categoryBarChart');
 
-if (pieChartCanvas) {
+if (barChartCanvas) {
     // data-* 属性からデータを取得
-    const labels = JSON.parse(pieChartCanvas.dataset.labels);
-    const data = JSON.parse(pieChartCanvas.dataset.data);
+    const labels = JSON.parse(barChartCanvas.dataset.labels);
+    const data = JSON.parse(barChartCanvas.dataset.data);
 
-    new Chart(pieChartCanvas, {
-        type: 'pie', // グラフの種類を 'pie' に
+    new Chart(barChartCanvas, {
+        type: 'bar', // グラフの種類を 'bar' に
         data: {
             labels: labels, // 凡例 (カテゴリ名)
             datasets: [{
                 label: '学習時間 (分)',
                 data: data,
-                // 各カテゴリの色を動的に生成（任意）
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)',
-                    'rgba(255, 159, 64, 0.7)'
-                ],
+                backgroundColor: 'rgba(255, 159, 64, 0.6)', // ← オレンジ色の塗りつぶし
+                borderColor: 'rgba(255, 159, 64, 1)',   // ← オレンジ色の枠線
+                borderWidth: 1
             }]
         },
         options: {
+            indexAxis: 'y', // ★この一行で横棒グラフになる
             responsive: true, // レスポンシブ対応
             maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '分'; // X軸の目盛りに「分」を付ける
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            if (value === 0) return ' 0分';
+                            const hours = Math.floor(value / 60);
+                            const minutes = value % 60;
+                            let tooltipLabel = '';
+                            if (hours > 0) {
+                                tooltipLabel += hours + '時間 ';
+                            }
+                            if (minutes > 0) {
+                                tooltipLabel += minutes + '分';
+                            }
+                            return tooltipLabel.trim();
+                        }
+                    }
+                }
+            }
         }
     });
 }

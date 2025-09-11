@@ -150,17 +150,44 @@ try {
     $stmt_pie_chart = $pdo->prepare($sql_pie_chart);
     $stmt_pie_chart->bindValue(':user_id', $user_id, PDO::PARAM_INT);
     $stmt_pie_chart->execute();
-    $pie_chart_raw = $stmt_pie_chart->fetchAll();
+    $bar_chart_raw = $stmt_pie_chart->fetchAll();
 
     // Chart.jsが使いやすいようにデータを整形
-    $pie_chart_labels = [];
-    $pie_chart_data = [];
-    foreach ($pie_chart_raw as $row) {
-        $pie_chart_labels[] = $row['category_name'];
-        $pie_chart_data[] = (int)$row['total_minutes'];
+    $bar_chart_labels = [];
+    $bar_chart_data = [];
+    foreach ($bar_chart_raw as $row) {
+        $bar_chart_labels[] = $row['category_name'];
+        $bar_chart_data[] = (int)$row['total_minutes'];
     }
 
     // --- ▲▲▲ ここまで追加 ▲▲▲ ---
+
+    // --- ▼▼▼ ここからサマリー用データ取得処理を追加 ▼▼▼ ---
+
+    // ログインユーザーの合計学習時間を取得
+    $sql_summary = "
+    SELECT
+        SUM(CASE WHEN ll.learning_date >= CURDATE() - INTERVAL 6 DAY THEN ld.duration_minutes ELSE 0 END) as total_7_days,
+        SUM(CASE WHEN ll.learning_date >= CURDATE() - INTERVAL 29 DAY THEN ld.duration_minutes ELSE 0 END) as total_30_days,
+        SUM(ld.duration_minutes) as total_all_time
+    FROM learning_details ld
+    JOIN learning_logs ll ON ld.log_id = ll.id
+    WHERE ll.user_id = :user_id
+    ";
+    $stmt_summary = $pdo->prepare($sql_summary);
+    $stmt_summary->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt_summary->execute();
+    $summary_data = $stmt_summary->fetch();
+
+    // 分を「〇時間〇分」の形式に変換するヘルパー関数
+    function format_minutes($minutes) {
+    if ($minutes < 1) return '0分';
+    $h = floor($minutes / 60);
+    $m = $minutes % 60;
+    return "{$h}時間 {$m}分";
+    }
+
+// --- ▲▲▲ ここまで追加 ▲▲▲ ---
 
 } catch (PDOException $e) {
     require_once 'utils.php';
@@ -211,6 +238,40 @@ try {
     <main class="main-content">
         <section class="stats-section">
             <h2>学習サマリー</h2>
+            <div class="summary-card-wrapper">
+                <div class="summary-card">
+                    <div class="summary-card-icon" style="color: #007bff;">
+                        <i class="fa-solid fa-calendar-week fa-2x"></i>
+                    </div>
+                    <div class="summary-card-content">
+                        <span class="summary-card-label">直近7日間</span>
+                        <span class="summary-card-spacer"></span>
+                        <span class="summary-card-value"><?php echo format_minutes($summary_data['total_7_days'] ?? 0); ?></span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-icon" style="color: #17a2b8;">
+                        <i class="fa-solid fa-calendar-days fa-2x"></i>
+                    </div>
+                    <div class="summary-card-content">
+                        <span class="summary-card-label">直近30日間</span>
+                        <span class="summary-card-spacer"></span>
+                        <span class="summary-card-value"><?php echo format_minutes($summary_data['total_30_days'] ?? 0); ?></span>
+                    </div>
+                </div>
+
+                <div class="summary-card">
+                    <div class="summary-card-icon" style="color: #28a745;">
+                        <i class="fa-solid fa-trophy fa-2x"></i>
+                    </div>
+                    <div class="summary-card-content">
+                        <span class="summary-card-label">総合計</span>
+                        <span class="summary-card-spacer"></span>
+                        <span class="summary-card-value"><?php echo format_minutes($summary_data['total_all_time'] ?? 0); ?></span>
+                    </div>
+                </div>
+            </div>
             <div class="charts-wrapper">
                 <div class="chart-container">
                     <div class="chart-canvas-container">
@@ -225,9 +286,9 @@ try {
                     <h3>カテゴリ別学習時間の割合</h3>
                     <div class="chart-canvas-container">
                         <canvas 
-                            id="categoryPieChart"
-                            data-labels='<?php echo json_encode($pie_chart_labels); ?>'
-                            data-data='<?php echo json_encode($pie_chart_data); ?>'
+                            id="categoryBarChart"
+                            data-labels='<?php echo json_encode($bar_chart_labels); ?>'
+                            data-data='<?php echo json_encode($bar_chart_data); ?>'
                         ></canvas>
                     </div>
                 </div>
@@ -377,6 +438,22 @@ try {
                                         </span>
                                     </div>
                                 <?php endif; ?>
+                            </div>
+
+                            <div class="log-details-breakdown">
+                                <ul>
+                                    <?php foreach ($details as $detail): ?>
+                                        <li>
+                                        <div class="detail-category-wrapper">
+                                            <span class="detail-category-name"><?php echo htmlspecialchars($detail['category_name']); ?></span>
+                                        </div>
+                                        <div class="detail-duration-wrapper">
+                                            <i class="fa-solid fa-clock detail-time-icon"></i>
+                                            <span class="detail-duration-value"><?php echo $detail['duration_minutes']; ?> 分</span>
+                                        </div>
+                                        </li>
+                                    <?php endforeach; ?>
+                                </ul>
                             </div>
 
                             <?php if (!empty($log['content'])): ?>

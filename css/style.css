@@ -96,6 +96,55 @@ main {
     min-height: 0;
 }
 
+/* ----- 学習サマリーカード (修正版) ----- */
+.summary-card-wrapper {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    flex: 1 1 250px; /* 画面幅に応じてカード幅を調整 */
+}
+
+.summary-card-icon {
+    margin-right: 20px; /* アイコンとテキストの間の余白を広げる */
+}
+
+/* ▼▼▼ この部分を全面的に修正 ▼▼▼ */
+.summary-card-content {
+    display: flex;
+    flex-direction: row; /* 横並びにする */
+    align-items: baseline; /* テキストのベースラインを揃える */
+    width: 100%;
+}
+
+.summary-card-spacer {
+    flex-grow: 1; /* スペースを埋めるように伸長 */
+    border-bottom: 1px dotted #ccc; /* 点線を追加 */
+    margin: 0 10px; /* 左右の余白 */
+    transform: translateY(-4px); /* 点線の高さを微調整 */
+}
+
+.summary-card-label {
+    color: #6c757d;
+    font-size: 1.1em; /* テキストサイズを大きく */
+    white-space: nowrap; /* ラベルが改行しないようにする */
+}
+
+.summary-card-value {
+    font-size: 1.1em; /* 値のテキストサイズをさらに大きく */
+    font-weight: bold; /* 太字（既に設定済みですが明記） */
+    color: black;
+}
+
 /* ----- ログ一覧 ----- */
 .list-header {
     display: flex;
@@ -133,6 +182,70 @@ main {
     padding: 16px;
     border-top: 1px solid #e9ecef;
     border-radius: 0 0 8px 8px;
+}
+
+/* ----- ログカード内のカテゴリ別時間表示 (修正版) ----- */
+.log-details-breakdown {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee; /* 上の要素との間に区切り線を入れる */
+}
+
+.log-details-breakdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid; /* グリッドレイアウトに変更 */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* レスポンシブな2カラム以上に */
+    gap: 10px; /* カード間の余白 */
+}
+
+.log-details-breakdown li {
+    background-color: #f8f9fa; /* カードの背景色 */
+    border: 1px solid #e0e0e0; /* カードの枠線 */
+    border-radius: 6px;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between; /* カテゴリと時間のブロックを両端に */
+    align-items: center; /* 垂直方向中央揃え */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* 軽い影 */
+    font-size: 0.9em;
+    color: #333;
+}
+
+.detail-category-wrapper {
+    flex-grow: 1; /* カテゴリ側が幅を広げる */
+    text-align: left;
+    padding-right: 10px; /* 時間との間に少し余白 */
+}
+
+.detail-duration-wrapper {
+    display: flex; /* アイコンと時間を横並びに */
+    align-items: center;
+    gap: 8px; /* アイコンと時間の間の余白 */
+    text-align: right;
+    white-space: nowrap; /* 時間表示が改行されないように */
+}
+
+.detail-category-name {
+    font-weight: bold;
+    color: #007bff; /* カテゴリ名を青色に */
+    background-color: #e6f3ff; /* 背景色を追加してタグ風に */
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block; /* パディングが効くように */
+    font-size: 0.95em; /* カテゴリ名の文字を少し大きく */
+}
+
+.detail-time-icon {
+    color: #6c757d; /* 時計アイコンの色 */
+    font-size: 1.1em;
+}
+
+.detail-duration-value {
+    font-weight: bold; /* 時間の値を太字に */
+    color: black;
+    font-size: 1.05em; /* 時間の値を少し大きく */
 }
 
 /* =================================================================
@@ -1025,6 +1138,11 @@ main {
     .chart-container {
         width: 100%; /* 幅を100%に */
         height: 300px; /* 高さを少し小さく */
+    }
+
+    /* ----- 学習サマリーカード (修正版) ----- */
+    .summary-card-label, .summary-card-value{
+        font-size: 0.9em; /* テキストサイズを大きく */
     }
 
     /* ----- 3. ログ一覧ヘッダーとフィルターの調整 ----- */
