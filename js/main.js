@@ -260,7 +260,7 @@ const showPasswordCheck = document.getElementById('show-password-check');
 if (showPasswordCheck) {
     showPasswordCheck.addEventListener('change', function() {
         // idが"password"または"confirm_password"の入力欄をすべて取得
-        const passwordFields = document.querySelectorAll('#password, #confirm_password');
+        const passwordFields = document.querySelectorAll('#current_password, #password, #confirm_password');
         
         // チェックボックスの状態に応じて、type属性を一括で切り替える
         const type = this.checked ? 'text' : 'password';

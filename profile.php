@@ -3,6 +3,13 @@ session_start();
 require_once 'db_connect.php';
 require_once 'utils.php';
 
+// セッションからフラッシュメッセージを取得
+$flash_message = $_SESSION['flash_message'] ?? null;
+// 一度表示したら不要なので、セッションから削除する
+if ($flash_message) {
+    unset($_SESSION['flash_message']);
+}
+
 // ▼▼▼▼▼ このPHPブロックを全面的に修正 ▼▼▼▼▼
 
 // ログインチェック
@@ -53,6 +60,7 @@ try {
     <title><?php echo htmlspecialchars($user['nickname']); ?>さんのプロフィール</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
 <div class="page-container">
@@ -109,5 +117,29 @@ try {
         </div>
     </main>
 </div>
+<?php
+// ... (ファイルの先頭部分) ...
+// ▼▼▼ 変数名を複数形に修正 ▼▼▼
+$flash_messages = $_SESSION['flash_messages'] ?? [];
+if ($flash_messages) {
+    unset($_SESSION['flash_messages']);
+}
+// ...
+?>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<?php if (!empty($flash_messages)): ?>
+<script>
+    <?php foreach ($flash_messages as $msg): ?>
+        Toastify({
+            text: "<?php echo htmlspecialchars($msg['message'], ENT_QUOTES); ?>",
+            duration: 5000,
+            gravity: "top",
+            position: "center",
+            backgroundColor: "<?php echo ($msg['type'] === 'success') ? '#28a745' : '#dc3545'; ?>",
+            stopOnFocus: true
+        }).showToast();
+    <?php endforeach; ?>
+</script>
+<?php endif; ?>
 </body>
 </html>

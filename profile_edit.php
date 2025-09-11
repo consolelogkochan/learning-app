@@ -104,6 +104,59 @@ try {
                             <textarea id="objective" name="objective" rows="3"><?php echo htmlspecialchars($old_input['objective'] ?? $user['objective'] ?? ''); ?></textarea>
                         </div>
                     </div>
+
+                    <hr class="form-divider">
+
+                    <div class="form-row">
+                        <label for="email">メールアドレス</label>
+                        <div class="input-area">
+                            <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($old_input['email'] ?? $user['email']); ?>" required>
+                            <?php if (isset($errors['email'])): ?>
+                                <p class="error-message"><?php echo htmlspecialchars($errors['email']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <hr class="form-divider">
+
+                    <h3 class="form-section-title">パスワードを変更する</h3>
+                    <div class="form-row">
+                        <label for="current_password">現在のパスワード</label>
+                        <div class="input-area">
+                            <input type="password" id="current_password" name="current_password" placeholder="変更する場合に入力">
+                            <small class="form-text">パスワードを変更する場合のみ、現在のパスワードを入力してください。</small>
+                            <?php if (isset($errors['current_password'])): ?>
+                                <p class="error-message"><?php echo htmlspecialchars($errors['current_password']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label for="password">新しいパスワード</label>
+                        <div class="input-area">
+                            <input type="password" id="password" name="password" placeholder="新しいパスワード">
+                            <small class="form-text">（大文字、小文字、数字を組み合わせた8文字以上）</small>
+                            <?php if (isset($errors['password'])): ?>
+                                <p class="error-message"><?php echo htmlspecialchars($errors['password']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label for="confirm_password">新しいパスワード（確認用）</label>
+                        <div class="input-area">
+                            <input type="password" id="confirm_password" name="confirm_password" placeholder="新しいパスワードを再入力">
+                            <?php if (isset($errors['confirm_password'])): ?>
+                                <p class="error-message"><?php echo htmlspecialchars($errors['confirm_password']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label></label> <div class="input-area">
+                            <div class="show-password">
+                                <input type="checkbox" id="show-password-check">
+                                <label for="show-password-check">パスワードを表示する</label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-actions">
                     <a href="profile.php?id=<?php echo htmlspecialchars($user_id); ?>" class="btn btn-secondary">キャンセル</a>
@@ -114,5 +167,42 @@ try {
     </main>
 </div>
 <script src="js/main.js"></script>
+<?php
+// もしバリデーションエラーが存在する場合のみ、スクロール用のスクリプトを出力
+if (!empty($errors)) {
+    // 最初に発生したエラーのキーを取得 (例: 'nickname', 'email'など)
+    $first_error_key = array_key_first($errors);
+
+    // エラーキーと、対応する入力欄のHTMLのid属性をマッピング
+    $element_id_map = [
+        'profile_image' => 'profile_image',
+        'nickname' => 'nickname',
+        'email' => 'email',
+        'current_password' => 'current_password',
+        'password' => 'password',
+        'confirm_password' => 'confirm_password'
+    ];
+
+    // マップに存在するキーであれば、スクロール先のIDを決定
+    if (isset($element_id_map[$first_error_key])) {
+        $scroll_to_id = $element_id_map[$first_error_key];
+        ?>
+        <script>
+            // ページの読み込みが完了したら実行
+            document.addEventListener('DOMContentLoaded', function() {
+                const errorElement = document.getElementById('<?php echo $scroll_to_id; ?>');
+                if (errorElement) {
+                    // エラー要素の位置までスムーズにスクロール
+                    errorElement.scrollIntoView({
+                        behavior: 'smooth', // スムーズなスクロール
+                        block: 'center'     // 画面の中央に表示
+                    });
+                }
+            });
+        </script>
+        <?php
+    }
+}
+?>
 </body>
 </html>

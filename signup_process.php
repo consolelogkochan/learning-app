@@ -55,40 +55,56 @@ if (!empty($errors)) {
 
 // --- DB登録とメール送信 ---
 try {
-    // パスワードをハッシュ化
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    // 認証用トークンと有効期限を生成
+    // まずは入力されたメールアドレスで既存ユーザーを検索
+    $sql_find = "SELECT * FROM users WHERE email = :email";
+    $stmt_find = $pdo->prepare($sql_find);
+    $stmt_find->bindValue(':email', $email, PDO::PARAM_STR);
+    $stmt_find->execute();
+    $existing_user = $stmt_find->fetch();
+
     $token = bin2hex(random_bytes(32));
     $token_expires_at = date('Y-m-d H:i:s', strtotime('+1 hour'));
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // is_active=0 (未認証) の状態でユーザー情報を挿入
-    $sql = "INSERT INTO users (nickname, email, password, is_active, verification_token, token_expires_at) 
-            VALUES (:nickname, :email, :password, 0, :token, :expires_at)";
-    
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindValue(':nickname', $nickname, PDO::PARAM_STR);
-    $stmt->bindValue(':email', $email, PDO::PARAM_STR);
-    $stmt->bindValue(':password', $hashed_password, PDO::PARAM_STR);
-    $stmt->bindValue(':token', $token, PDO::PARAM_STR);
-    $stmt->bindValue(':expires_at', $token_expires_at, PDO::PARAM_STR);
-    $stmt->execute();
+    if ($existing_user) {
+        // --- ユーザーが存在する場合 ---
+        if ($existing_user['is_active'] == 1) {
+            // A) 認証済みユーザーの場合 -> エラー
+            $_SESSION['errors']['email'] = 'このメールアドレスは既に使用されています。';
+            $_SESSION['old_input'] = $_POST;
+            header('Location: signup.php');
+            exit;
+        } else {
+            // B) 未認証ユーザーの場合 -> 情報を更新してメール再送
+            $sql_update = "UPDATE users SET nickname = :nickname, password = :password, verification_token = :token, token_expires_at = :expires_at WHERE id = :id";
+            $stmt_update = $pdo->prepare($sql_update);
+            $stmt_update->bindValue(':nickname', $nickname, PDO::PARAM_STR);
+            $stmt_update->bindValue(':password', $hashed_password, PDO::PARAM_STR);
+            $stmt_update->bindValue(':token', $token, PDO::PARAM_STR);
+            $stmt_update->bindValue(':expires_at', $token_expires_at, PDO::PARAM_STR);
+            $stmt_update->bindValue(':id', $existing_user['id'], PDO::PARAM_INT);
+            $stmt_update->execute();
+        }
+    } else {
+        // --- C) ユーザーが存在しない場合 -> 新規登録 ---
+        $sql_insert = "INSERT INTO users (nickname, email, password, is_active, verification_token, token_expires_at) 
+                       VALUES (:nickname, :email, :password, 0, :token, :expires_at)";
+        $stmt_insert = $pdo->prepare($sql_insert);
+        $stmt_insert->bindValue(':nickname', $nickname, PDO::PARAM_STR);
+        $stmt_insert->bindValue(':email', $email, PDO::PARAM_STR);
+        $stmt_insert->bindValue(':password', $hashed_password, PDO::PARAM_STR);
+        $stmt_insert->bindValue(':token', $token, PDO::PARAM_STR);
+        $stmt_insert->bindValue(':expires_at', $token_expires_at, PDO::PARAM_STR);
+        $stmt_insert->execute();
+    }
 
-    // DB登録後にメール送信関数を呼び出す
+    // B)とC)のどちらの場合でも認証メールを送信する
     send_verification_email($email, $token);
     
-    // メール送信成功時の画面にリダイレクト
     header('Location: signup_success.php');
     exit();
 
 } catch (PDOException $e) {
-    // ▼▼▼▼▼ DBエラーの処理を修正 ▼▼▼▼▼
-    if ($e->getCode() == 23000) { // 一意制約違反（メールアドレス重複）
-        $_SESSION['errors']['email'] = 'このメールアドレスは既に使用されています。';
-        $_SESSION['old_input'] = $_POST;
-        header('Location: signup.php');
-        exit;
-    }
-    // その他のDBエラーはシステムエラーとして処理
+    // 上記ロジックで重複エラーは処理済みのため、ここは予期せぬDBエラー
     handle_system_error('ユーザー登録中にエラーが発生しました。', $_POST, $e->getMessage());
-    // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
 }

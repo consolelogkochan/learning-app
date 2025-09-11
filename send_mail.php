@@ -110,3 +110,52 @@ function send_password_reset_email($to, $token) {
         show_error_and_exit('メールの送信に失敗しました。時間をおいて再度お試しください。', "Mailer Error: {$mail->ErrorInfo}");
     }
 }
+
+// ▼▼▼ この関数を丸ごと追記 ▼▼▼
+/**
+ * メールアドレス変更の認証メールを送信する
+ * @param string $to 新しいメールアドレス
+ * @param string $token 認証用トークン
+ */
+
+function send_email_change_verification($to, $token) {
+    $mail = new PHPMailer(true);
+
+    try {
+        // SMTPサーバー設定 (既存の関数と全く同じ)
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'ik.tenzan.096@gmail.com'; // あなたのGmailアドレス
+        $mail->Password = 'rama nthq lwff sviv';        // あなたのアプリパスワード
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+        $mail->CharSet = 'UTF-8';
+
+        // 送信者と受信者の設定
+        $mail->setFrom('ik.tenzan.096@gmail.com', '学習管理アプリ');
+        $mail->addAddress($to);
+
+        // メールの内容
+        $mail->isHTML(true);
+        $mail->Subject = '【学習管理アプリ】メールアドレスの変更認証';
+
+        // 認証用URLを生成
+        // (注意: 飛び先は verify_email_change.php)
+        $verification_url = $_ENV['APP_URL'] . "/verify_email_change.php?token=" . urlencode($token);
+
+        $mail->Body = "
+            <h2>メールアドレス変更の確認</h2>
+            <p>このメールアドレスを新しい連絡先として登録するには、以下のリンクをクリックしてください。</p>
+            <p>この操作に心当たりがない場合は、このメールを無視してください。</p>
+            <p><a href='{$verification_url}'>メールアドレスを認証する</a></p>
+            <p>このリンクの有効期限は1時間です。</p>
+        ";
+
+        $mail->send();
+
+    } catch (Exception $e) {
+        // エラー処理は既存の関数と同様
+        show_error_and_exit('メールの送信に失敗しました。時間をおいて再度お試しください。', "Mailer Error: {$mail->ErrorInfo}");
+    }
+}

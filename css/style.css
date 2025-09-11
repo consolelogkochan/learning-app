@@ -953,6 +953,49 @@ main {
     cursor: pointer;
 }
 
+/* emailとpasswordの入力欄を、既存のスタイルに統合 */
+.form-row input[type="text"],
+.form-row input[type="email"],
+.form-row input[type="password"],
+.form-row textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+/* 区切り線 (hr) のスタイル */
+.form-divider {
+    border: none; /* デフォルトの線を消す */
+    border-top: 1px solid #e9ecef; /* CSSで新しい線を引く */
+    margin: 0;
+}
+
+/* 「パスワードを変更する」などのセクションタイトルのスタイル */
+.form-section-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    padding: 24px;
+    margin: 0;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* 「〜〜を入力してください」などの補足テキストのスタイル */
+.form-text {
+    font-size: 0.85em;
+    color: #6c757d; /* 少し薄い色にする */
+    display: block; /* 改行させる */
+    margin-top: 5px;
+}
+/* エラーメッセージのスタイル (input-area内にある場合) */
+.input-area .error-message {
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #dc3545; /* 赤色 */
+}
+
 /* =================================================================
    5. Pages (ページ固有のスタイル)
    - ログイン、新規登録など -
